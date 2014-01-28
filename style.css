@@ -1,0 +1,27 @@
+body {
+    background-color: #FFEDD6;
+    margin: 80px auto;
+    text-align: center;
+    font-size: 17px;
+    line-height: 24px;
+}
+
+.btn-stereo {
+    color: transparent;
+    background-color: transparent;
+    border-color: transparent;
+    cursor: pointer;
+}
+
+.btn-stereo:active {
+    position: relative;
+    top: 2px;
+    left: 1px;
+}
+
+.btn-rect {
+    border-color: transparent;
+    cursor: pointer;
+    height: 95px;
+    width: 145px;
+}
