@@ -112,9 +112,9 @@ window.onload = function () {
         alert("No web audio support in this browser :(");
         return;
     }
-    
+
     synth.turnMeOn();
-    
+
     document.onkeydown = function (event) {
         synth.pressKey(event.keyCode);
     };
