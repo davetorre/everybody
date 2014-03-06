@@ -1,5 +1,3 @@
-(function () { "use strict";
-
 var context, // the audio context
     synth,   // synth object
     everybodyAudio = document.getElementById('everybodyAudio'),
@@ -10,15 +8,6 @@ var context, // the audio context
     sawButton = document.getElementById('sawButton'),
     octaveButton = document.getElementById('octaveButton');
 
-(function init() {
-    try {
-        context = new webkitAudioContext();
-        //testOscillator = context.createOscillator();
-    } catch (e) {
-        alert('No web audio oscillator support in this browser');
-    }
-}());
-
 synth = {
     gainNode: null,
     filter: null,
@@ -27,7 +16,7 @@ synth = {
     currentKeyCode: null,
     octave: 1,
     turnMeOn: function () {
-        this.gainNode = context.createGainNode();
+        this.gainNode = context.createGain();
         this.gainNode.gain.value = 0.04;
         this.gainNode.connect(context.destination);
         this.filter = context.createBiquadFilter();
@@ -35,7 +24,7 @@ synth = {
         this.filter.frequency.value = 8000;
         this.filter.connect(this.gainNode);
     },
-    playNote: function (freq) {
+    playNote: function (freq, delay) {
         this.oscillator = context.createOscillator();
         this.oscillator.type = this.oscType;
         if (this.oscType === 2) {
@@ -45,7 +34,7 @@ synth = {
         }
         this.oscillator.frequency.value = freq * this.octave;
         this.oscillator.connect(this.filter);
-        this.oscillator.noteOn(0);
+        this.oscillator.start(delay);
     },
     getFrequency: function (keyCode) {
         switch (keyCode) {
@@ -85,31 +74,22 @@ synth = {
         if (freq) {
             if (this.currentKeyCode) {
                 // Turn off the current note if one exists
-                this.oscillator.noteOff(0);
+                this.oscillator.stop(0);
             }
             this.currentKeyCode = keyCode;
-            this.playNote(freq);
+            this.playNote(freq, 0);
         }
     },
     liftKey: function (keyCode) {
         if (keyCode === this.currentKeyCode) {
-            this.oscillator.noteOff(0);
+            this.oscillator.stop(0);
             this.currentKeyCode = null;
         }
     }
 };
 
 everybodyAudio.oncanplaythrough = function () {
-    synth.turnMeOn();
     document.getElementById('title').innerHTML = 'Everybody Wants You';
-};
-
-document.onkeydown = function (event) {
-    synth.pressKey(event.keyCode);
-};
-
-document.onkeyup = function (event) {
-    synth.liftKey(event.keyCode);
 };
 
 playButton.onclick = function () {
@@ -125,30 +105,47 @@ stopButton.onclick = function () {
     everybodyAudio.currentTime = 0;
 };
 
-squareButton.onclick = function () {
-    if (synth.oscType === 2) {
-        synth.oscType = 1;
-        squareButton.style.background = '#FFFFFF';
-        sawButton.style.background = '#5d5d5d';
+window.onload = function () {
+    try {
+        context = new AudioContext();
+    } catch (e) {
+        alert("No web audio support in this browser :(");
+        return;
     }
-};
+    
+    synth.turnMeOn();
+    
+    document.onkeydown = function (event) {
+        synth.pressKey(event.keyCode);
+    };
 
-sawButton.onclick = function () {
-    if (synth.oscType === 1) {
-        synth.oscType = 2;
-        sawButton.style.background = '#FFFFFF';
-        squareButton.style.background = '#5d5d5d';
-    }
-};
+    document.onkeyup = function (event) {
+        synth.liftKey(event.keyCode);
+    };
 
-octaveButton.onclick = function () {
-    if (synth.octave === 1) {
-        synth.octave = 2;
-        octaveButton.style.background = '#FFFFFF';
-    } else {
-        synth.octave = 1;
-        octaveButton.style.background = '#5d5d5d';
-    }
-};
+    squareButton.onclick = function () {
+        if (synth.oscType === 2) {
+            synth.oscType = 1;
+            squareButton.style.background = '#FFFFFF';
+            sawButton.style.background = '#5d5d5d';
+        }
+    };
 
-}());
+    sawButton.onclick = function () {
+        if (synth.oscType === 1) {
+            synth.oscType = 2;
+            sawButton.style.background = '#FFFFFF';
+            squareButton.style.background = '#5d5d5d';
+        }
+    };
+
+    octaveButton.onclick = function () {
+        if (synth.octave === 1) {
+            synth.octave = 2;
+            octaveButton.style.background = '#FFFFFF';
+        } else {
+            synth.octave = 1;
+            octaveButton.style.background = '#5d5d5d';
+        }
+    };
+};
